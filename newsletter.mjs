@@ -11,6 +11,8 @@ const {
   FROM_EMAIL, TO_EMAILS,
 } = process.env;
 
+console.log("API key starts with:", ANTHROPIC_API_KEY?.slice(0, 10));
+
 // ── Anthropic client ──────────────────────────────────────────────────────────
 const client = new Anthropic({
   apiKey: ANTHROPIC_API_KEY,
