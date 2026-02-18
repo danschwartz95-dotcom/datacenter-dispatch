@@ -1,0 +1,33 @@
+name: DataCenter Dispatch — Daily Newsletter
+
+on:
+  schedule:
+    - cron: '0 12 * * 1-5'  # 7:00 AM ET (12:00 UTC), Monday–Friday
+  workflow_dispatch:          # allows you to trigger it manually from GitHub
+
+jobs:
+  send-newsletter:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install @anthropic-ai/sdk nodemailer
+
+      - name: Fetch and send newsletter
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          SMTP_HOST:         ${{ secrets.SMTP_HOST }}
+          SMTP_PORT:         ${{ secrets.SMTP_PORT }}
+          SMTP_USER:         ${{ secrets.SMTP_USER }}
+          SMTP_PASS:         ${{ secrets.SMTP_PASS }}
+          FROM_EMAIL:        ${{ secrets.FROM_EMAIL }}
+          TO_EMAILS:         ${{ secrets.TO_EMAILS }}
+        run: node newsletter.mjs
