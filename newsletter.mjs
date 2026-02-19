@@ -16,110 +16,85 @@ const client = new Anthropic({
   defaultHeaders: { "anthropic-beta": "web-search-2025-03-05" },
 });
 
-// ── Prompt ────────────────────────────────────────────────────────────────────
-const today = new Date();
-const yesterday = new Date(today);
-yesterday.setDate(yesterday.getDate() - 1);
+// ── Date helpers ──────────────────────────────────────────────────────────────
+const today      = new Date();
 const twoDaysAgo = new Date(today);
 twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
 
-const dateStr = today.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
-const cutoffStr = twoDaysAgo.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+const dateStr    = today.toLocaleDateString("en-US", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+const cutoffStr  = twoDaysAgo.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 
-const prompt = `Today is ${today.toDateString()}.
+// ── Refined prompt ────────────────────────────────────────────────────────────
+const prompt = `Today is ${today.toDateString()}. Your cutoff is ${cutoffStr} — do not cite any article published before that date. If a section has no qualifying news, omit it entirely rather than noting the absence.
 
-CRITICAL INSTRUCTION: Only include news articles published on or after ${cutoffStr}. Do not include any article older than 48 hours from today. If you cannot find a recent article for a section, write "No developments published in the past 48 hours" for that section rather than using older articles.
+You are a senior analyst producing the Daily Data Center Intelligence Briefing for Hubbell Incorporated's Business Development, Sales, and Executive teams. Hubbell sells electrical infrastructure into data centers: power distribution units, switchgear, connectors, cable management, wiring devices, and utility-scale power systems. Every insight should be filtered through that commercial lens.
 
-Search the web thoroughly for data center news published in the past 48 hours — U.S. and global. Then write the following briefing.
+Search the web broadly — run multiple searches across U.S. news, international news, hyperscaler announcements, infrastructure trade press (Data Center Dynamics, DCD, DCK, The Register, Bloomberg, Reuters), and competitor newsrooms. Prioritize stories with direct implications for electrical infrastructure spend, construction activity, and power procurement.
 
-Produce a Daily Data Center Intelligence Briefing for Hubbell Incorporated's Business Development team. Focus on electrical infrastructure, power distribution, grid capacity, switchgear, connectors, cable management, utility-scale power, cooling-electrical integration, and construction activity.
+Produce the briefing in clean Markdown using the structure below. Write with executive economy: tight bullets, no filler, no repetition. Include the publication date and a clickable Markdown link for every cited source.
 
-FORMATTING RULES — follow these exactly:
-- Use consistent Georgia serif font for all headings
-- Use clean bullet points for all lists — no dense paragraphs
-- Every cited fact must include a clickable Markdown hyperlink: [Source Name](URL)
-- Keep the total briefing to 600-800 words (excluding the relevance chart)
-- Be concise — one or two bullets per point, no filler sentences
-
-Use exactly this structure:
+---
 
 # Daily Data Center Intelligence Briefing
 **${dateStr}**
-*Prepared for: Hubbell Incorporated — Business Development*
+*Hubbell Incorporated — Business Development Intelligence*
 
 ---
 
-## 1. Top Headlines
-For each headline (3-5 only):
-- **[Headline title]** — one sentence summary. [Source](URL) — Published: [exact date]
-  - **Hubbell Relevance:** High / Medium / Low — one sentence on why it matters
+## Top Headlines
+For each story (aim for 4–6):
+- **[Headline]** ([Publication], [Date]) — [one crisp sentence on what happened]. [Read more →](URL)
+  - *Hubbell Signal:* **High / Medium / Low** — [one sentence on the specific commercial implication for Hubbell]
 
 ---
 
-## 2. U.S. Market Update
-- Bullet 1 with key development. [Source](URL)
-- Bullet 2 with key development. [Source](URL)
-- Bullet 3 with key development. [Source](URL)
+## U.S. Market Pulse
+Three to five bullets on the most actionable U.S. developments — new campuses, construction starts, power procurement deals, permitting milestones, and regional capacity trends. Focus on projects large enough to drive electrical infrastructure spend. Cite each bullet.
 
 ---
 
-## 3. International Market Update
-- Bullet 1. [Source](URL)
-- Bullet 2. [Source](URL)
+## Global Watch
+Two to four bullets on international developments most likely to affect U.S. supply chains, competitor positioning, or Hubbell's export markets. Omit this section if nothing relevant was published in the window.
 
 ---
 
-## 4. Hyperscaler Activity
-Only include hyperscalers with news published in the past 48 hours:
-- **AWS:** [one bullet]. [Source](URL)
-- **Microsoft Azure:** [one bullet]. [Source](URL)
-- **Google Cloud:** [one bullet]. [Source](URL)
-- **Meta:** [one bullet]. [Source](URL)
-- **Other (OpenAI/Oracle/xAI):** [one bullet if relevant]. [Source](URL)
+## Hyperscaler Tracker
+One tight bullet per hyperscaler with confirmed news in the window. Include spend figures, MW capacity, or location where reported. Skip any hyperscaler with no qualifying news.
+- **AWS:**
+- **Microsoft Azure:**
+- **Google Cloud:**
+- **Meta:**
+- **Oracle / OpenAI / xAI:**
 
 ---
 
-## 5. Technology & Infrastructure Trends
-- Bullet 1. [Source](URL)
-- Bullet 2. [Source](URL)
-- Bullet 3. [Source](URL)
+## Infrastructure & Technology Signals
+Two to four bullets on power density trends, cooling-electrical integration, grid interconnection developments, AI-driven load growth, and emerging product categories relevant to Hubbell's portfolio. Cite each bullet.
 
 ---
 
-## 6. Competitor Tracking
-Only include competitors with news in the past 48 hours. If none, write "No significant activity identified."
-- **Eaton:** [one bullet or "No significant activity identified"]
-- **Schneider Electric:** [one bullet or "No significant activity identified"]
-- **ABB:** [one bullet or "No significant activity identified"]
-- **Vertiv:** [one bullet or "No significant activity identified"]
-- **nVent:** [one bullet or "No significant activity identified"]
+## Competitor Intelligence
+One bullet per competitor with news in the window — product launches, contract wins, partnerships, or strategic moves. Skip any competitor with no qualifying news.
+- **Eaton:**
+- **Schneider Electric:**
+- **Vertiv:**
+- **ABB:**
+- **nVent:**
 
 ---
 
-## 7. Implications for Hubbell
-- [Actionable strategic implication 1]
-- [Actionable strategic implication 2]
-- [Actionable strategic implication 3]
+## Hubbell Implications
+Three to five direct, actionable bullets for Hubbell's BD and sales teams based on today's news. Tie each implication to a specific story or trend from above. Be blunt and commercial.
 
 ---
 
-## 8. Quick-Scan Summary
-- [Key takeaway 1]
-- [Key takeaway 2]
-- [Key takeaway 3]
-- [Key takeaway 4]
-- [Key takeaway 5]
-- [Key takeaway 6]
+## 60-Second Brief
+Eight to ten bullets — the absolute essentials for an executive who has one minute. Start each with a bolded topic label.
 
 ---
 
-## Hubbell Relevance Chart
-
-| # | Headline | Relevance | Rationale |
-|---|----------|-----------|-----------|
-| 1 | [title] | High/Medium/Low | [one sentence] |
-
-Output only the briefing. No text before or after it.`;
+Tone: Direct, analytical, executive-ready. No hedging, no preamble, no summary of what you are about to say.
+Output only the briefing. Nothing before the opening # heading, nothing after the last bullet.`;
 
 // ── Fetch briefing ────────────────────────────────────────────────────────────
 async function fetchBriefing() {
@@ -128,7 +103,7 @@ async function fetchBriefing() {
   const response = await client.messages.create({
     model: "claude-sonnet-4-20250514",
     max_tokens: 6000,
-    tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 10 }],
+    tools: [{ type: "web_search_20250305", name: "web_search", max_uses: 12 }],
     messages: [{ role: "user", content: prompt }],
   });
 
@@ -150,81 +125,75 @@ function markdownToHTML(md) {
   let h = md;
 
   // Headings
-  h = h.replace(/^# (.+)$/gm,
-    '<h1 style="font-family:Georgia,serif;font-size:26px;font-weight:900;color:#0f0f0f;margin:0 0 6px;line-height:1.2;">$1</h1>');
-  h = h.replace(/^## (.+)$/gm,
-    '<h2 style="font-family:Georgia,serif;font-size:16px;font-weight:700;color:#0f0f0f;margin:26px 0 10px;padding-top:16px;border-top:2px solid #0f0f0f;">$1</h2>');
-  h = h.replace(/^### (.+)$/gm,
-    '<h3 style="font-family:Georgia,serif;font-size:14px;font-weight:700;color:#0f0f0f;margin:12px 0 6px;">$1</h3>');
+  h = h.replace(/^# (.+)$/gm, (_, t) =>
+    `<h1 style="font-family:'Playfair Display',Georgia,serif;font-size:30px;font-weight:900;color:#0f0f0f;margin:0 0 4px;line-height:1.15;letter-spacing:-0.5px;">${t}</h1>`);
+
+  h = h.replace(/^## (.+)$/gm, (_, t) =>
+    `<table width="100%" cellpadding="0" cellspacing="0" style="margin:28px 0 12px;"><tr>
+      <td style="border-top:2px solid #0f0f0f;width:18px;padding-top:5px;"></td>
+      <td style="padding:0 10px;white-space:nowrap;">
+        <span style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:0.35em;text-transform:uppercase;color:#c8401a;">${t}</span>
+      </td>
+      <td style="border-top:2px solid #0f0f0f;padding-top:5px;"></td>
+    </tr></table>`);
+
+  h = h.replace(/^### (.+)$/gm, (_, t) =>
+    `<h3 style="font-family:'Playfair Display',Georgia,serif;font-size:14px;font-weight:700;color:#0f0f0f;margin:14px 0 5px;">${t}</h3>`);
 
   // Bold italic
   h = h.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
 
-  // Relevance badges — must come before general bold replacement
-  h = h.replace(/\*\*Hubbell Relevance:\*\*\s*High/gi,
-    '<strong style="font-family:Georgia,serif;color:#0f0f0f;">Hubbell Relevance:</strong> <span style="display:inline-block;background:#166534;color:#fff;padding:1px 7px;border-radius:3px;font-size:10px;font-family:\'Helvetica Neue\',Arial,sans-serif;letter-spacing:0.05em;font-weight:600;">HIGH</span>');
-  h = h.replace(/\*\*Hubbell Relevance:\*\*\s*Medium/gi,
-    '<strong style="font-family:Georgia,serif;color:#0f0f0f;">Hubbell Relevance:</strong> <span style="display:inline-block;background:#92400e;color:#fff;padding:1px 7px;border-radius:3px;font-size:10px;font-family:\'Helvetica Neue\',Arial,sans-serif;letter-spacing:0.05em;font-weight:600;">MEDIUM</span>');
-  h = h.replace(/\*\*Hubbell Relevance:\*\*\s*Low/gi,
-    '<strong style="font-family:Georgia,serif;color:#0f0f0f;">Hubbell Relevance:</strong> <span style="display:inline-block;background:#374151;color:#fff;padding:1px 7px;border-radius:3px;font-size:10px;font-family:\'Helvetica Neue\',Arial,sans-serif;letter-spacing:0.05em;font-weight:600;">LOW</span>');
+  // Hubbell Signal badges — before general bold
+  h = h.replace(/\*Hubbell Signal:\*\s*\*\*High\*\*/gi,
+    `<span style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:10px;font-style:normal;">⬆ <strong>Hubbell Signal:</strong> <span style="background:#166534;color:#fff;padding:1px 7px;border-radius:2px;font-size:10px;font-weight:600;letter-spacing:0.04em;">HIGH</span></span>`);
+  h = h.replace(/\*Hubbell Signal:\*\s*\*\*Medium\*\*/gi,
+    `<span style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:10px;font-style:normal;">◆ <strong>Hubbell Signal:</strong> <span style="background:#92400e;color:#fff;padding:1px 7px;border-radius:2px;font-size:10px;font-weight:600;letter-spacing:0.04em;">MEDIUM</span></span>`);
+  h = h.replace(/\*Hubbell Signal:\*\s*\*\*Low\*\*/gi,
+    `<span style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:10px;font-style:normal;">▸ <strong>Hubbell Signal:</strong> <span style="background:#374151;color:#fff;padding:1px 7px;border-radius:2px;font-size:10px;font-weight:600;letter-spacing:0.04em;">LOW</span></span>`);
 
-  // Relevance chart badge colors
-  h = h.replace(/\bHigh\b(?=\s*<\/td>)/g,
-    '<span style="display:inline-block;background:#166534;color:#fff;padding:1px 7px;border-radius:3px;font-size:10px;font-weight:600;">High</span>');
-  h = h.replace(/\bMedium\b(?=\s*<\/td>)/g,
-    '<span style="display:inline-block;background:#92400e;color:#fff;padding:1px 7px;border-radius:3px;font-size:10px;font-weight:600;">Medium</span>');
-  h = h.replace(/\bLow\b(?=\s*<\/td>)/g,
-    '<span style="display:inline-block;background:#374151;color:#fff;padding:1px 7px;border-radius:3px;font-size:10px;font-weight:600;">Low</span>');
+  // Also handle inline High/Medium/Low without the italic wrapper
+  h = h.replace(/\*\*Hubbell Signal:\*\*\s*High/gi,
+    `<span style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:10px;">⬆ <strong>Hubbell Signal:</strong> <span style="background:#166534;color:#fff;padding:1px 7px;border-radius:2px;font-size:10px;font-weight:600;">HIGH</span></span>`);
+  h = h.replace(/\*\*Hubbell Signal:\*\*\s*Medium/gi,
+    `<span style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:10px;">◆ <strong>Hubbell Signal:</strong> <span style="background:#92400e;color:#fff;padding:1px 7px;border-radius:2px;font-size:10px;font-weight:600;">MEDIUM</span></span>`);
+  h = h.replace(/\*\*Hubbell Signal:\*\*\s*Low/gi,
+    `<span style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:10px;">▸ <strong>Hubbell Signal:</strong> <span style="background:#374151;color:#fff;padding:1px 7px;border-radius:2px;font-size:10px;font-weight:600;">LOW</span></span>`);
 
-  // Markdown links → HTML links
+  // Markdown links → HTML
   h = h.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g,
-    '<a href="$2" style="color:#c8401a;font-family:Georgia,serif;text-decoration:none;border-bottom:1px solid #c8401a;" target="_blank">$1</a>');
+    `<a href="$2" style="color:#c8401a;font-family:Georgia,serif;text-decoration:none;border-bottom:1px solid rgba(200,64,26,0.35);" target="_blank">$1</a>`);
 
   // Bold
   h = h.replace(/\*\*(.+?)\*\*/g,
-    '<strong style="font-family:Georgia,serif;">$1</strong>');
+    `<strong style="font-family:Georgia,serif;color:#0f0f0f;">$1</strong>`);
 
   // Italic
-  h = h.replace(/\*([^*\n]+?)\*/g, '<em>$1</em>');
+  h = h.replace(/\*([^*\n]+?)\*/g, '<em style="color:#4b5563;">$1</em>');
 
-  // Horizontal rule
+  // Horizontal rules
   h = h.replace(/^---$/gm,
     '<hr style="border:none;border-top:1px solid #d4c9b0;margin:16px 0;"/>');
 
-  // Tables
-  const tableRegex = /(\|.+\|\n)((\|[-: ]+\|\n))(\|.+\|\n)*/gm;
-  h = h.replace(tableRegex, (block) => {
-    const rows = block.trim().split('\n').filter(r => r.trim());
-    let out = '<table width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin:14px 0;font-family:Georgia,serif;">';
-    let first = true;
-    for (const row of rows) {
-      if (/^\|[-| :]+\|$/.test(row.trim())) continue;
-      const cells = row.split('|').slice(1, -1);
-      if (first) {
-        out += '<tr>' + cells.map(c =>
-          `<th style="background:#0f0f0f;color:#f5f0e8;font-family:'Helvetica Neue',Arial,sans-serif;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;padding:8px 12px;text-align:left;">${c.trim()}</th>`
-        ).join('') + '</tr>';
-        first = false;
-      } else {
-        out += '<tr>' + cells.map(c =>
-          `<td style="padding:8px 12px;border-bottom:1px solid #e5e7eb;font-family:Georgia,serif;font-size:13px;vertical-align:top;color:#1a1a1a;">${c.trim()}</td>`
-        ).join('') + '</tr>';
-      }
-    }
-    return out + '</table>';
-  });
+  // Bullet points — top-level headlines get special treatment
+  // First pass: nested bullets (sub-items starting with spaces)
+  h = h.replace(/^  - (.+)$/gm,
+    `<li style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:12px;line-height:1.65;color:#4b5563;margin:5px 0 5px 0;padding-left:2px;list-style:none;border-left:2px solid #e5e7eb;padding-left:10px;">$1</li>`);
 
-  // Bullet points
+  // Top-level bullets
   h = h.replace(/^- (.+)$/gm,
-    '<li style="font-family:Georgia,serif;font-size:14px;line-height:1.75;color:#1a1a1a;margin-bottom:6px;padding-left:2px;">$1</li>');
+    `<li style="font-family:Georgia,serif;font-size:14px;line-height:1.75;color:#1a1a1a;margin-bottom:8px;padding-left:2px;">$1</li>`);
 
-  // Wrap <li> in <ul>
-  h = h.replace(/(<li[\s\S]*?<\/li>\n?)+/g,
-    '<ul style="margin:8px 0 14px 20px;padding:0;">$&</ul>');
+  // Wrap nested <li> (with border-left) in a sub-ul
+  h = h.replace(/(<li[^>]*border-left[^>]*>[\s\S]*?<\/li>\n?)+/g,
+    '<ul style="margin:4px 0 8px 0;padding:0;list-style:none;">$&</ul>');
+
+  // Wrap remaining <li> in <ul>
+  h = h.replace(/(<li[^>]*font-family:Georgia[^>]*>[\s\S]*?<\/li>\n?)+/g,
+    '<ul style="margin:8px 0 14px 16px;padding:0;">$&</ul>');
 
   // Paragraphs
   h = h.replace(/^(?!<)(?!$)(.+)$/gm,
-    '<p style="font-family:Georgia,serif;font-size:14px;line-height:1.75;color:#1a1a1a;margin:0 0 10px;font-weight:400;">$1</p>');
+    `<p style="font-family:Georgia,serif;font-size:14px;line-height:1.75;color:#1a1a1a;margin:0 0 10px;">$1</p>`);
 
   // Clean empty paragraphs
   h = h.replace(/<p[^>]*>\s*<\/p>/g, '');
@@ -232,56 +201,79 @@ function markdownToHTML(md) {
   return h;
 }
 
-// ── Render HTML email ─────────────────────────────────────────────────────────
+// ── Render full email ─────────────────────────────────────────────────────────
 function renderEmail(markdown) {
   const body = markdownToHTML(markdown);
-  const dateLabel = today.toLocaleDateString("en-US", {
-    weekday: "long", year: "numeric", month: "long", day: "numeric"
-  });
 
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>Data Center Intelligence Briefing — ${dateLabel}</title>
+  <title>Data Center Intelligence Briefing — ${dateStr}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&display=swap" rel="stylesheet"/>
 </head>
-<body style="margin:0;padding:0;background:#f0ebe0;font-family:Georgia,serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f0ebe0;padding:24px 0;">
+<body style="margin:0;padding:0;background:#ede8dc;font-family:Georgia,serif;">
+
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#ede8dc;padding:28px 0;">
 <tr><td align="center">
-<table width="680" cellpadding="0" cellspacing="0" style="max-width:680px;width:100%;background:#faf6ee;border:1px solid #d4c9b0;">
+<table width="680" cellpadding="0" cellspacing="0" style="max-width:680px;width:100%;background:#f5f0e8;border:1px solid #c9bfaa;">
+
+  <!-- TOP RULE -->
+  <tr><td style="padding:0 44px;">
+    <table width="100%" cellpadding="0" cellspacing="0"><tr>
+      <td style="height:4px;background:#0f0f0f;"></td>
+    </tr></table>
+  </td></tr>
 
   <!-- MASTHEAD -->
-  <tr><td style="padding:30px 44px 20px;text-align:center;border-bottom:3px double #0f0f0f;background:#faf6ee;">
-    <p style="margin:0 0 6px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:9px;letter-spacing:0.35em;text-transform:uppercase;color:#c8401a;">
+  <tr><td style="padding:28px 44px 22px;text-align:center;background:#f5f0e8;border-bottom:3px double #0f0f0f;">
+    <p style="margin:0 0 8px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:9px;font-weight:700;letter-spacing:0.4em;text-transform:uppercase;color:#c8401a;">
       Daily Intelligence Briefing &nbsp;·&nbsp; Data Center Market Monitor
     </p>
-    <h1 style="margin:0 0 6px;font-family:Georgia,serif;font-size:36px;font-weight:900;line-height:1.1;color:#0f0f0f;">
-      Data Center<br/><span style="color:#c8401a;">Intelligence Briefing</span>
+    <h1 style="margin:0;font-family:'Playfair Display',Georgia,serif;font-size:48px;font-weight:900;line-height:1;letter-spacing:-1.5px;color:#0f0f0f;">
+      DataCenter<span style="color:#c8401a;">IQ</span>
     </h1>
-    <p style="margin:8px 0 2px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:9px;letter-spacing:0.2em;color:#6b7280;text-transform:uppercase;">
-      ${dateLabel}
+    <p style="margin:10px 0 0;font-family:'Helvetica Neue',Arial,sans-serif;font-size:9px;letter-spacing:0.25em;color:#6b7280;text-transform:uppercase;">
+      ${dateStr}
     </p>
-    <p style="margin:0;font-family:'Helvetica Neue',Arial,sans-serif;font-size:9px;letter-spacing:0.15em;color:#c8401a;text-transform:uppercase;">
-      Prepared for Hubbell Incorporated
-    </p>
+    <!-- Decorative rule with label -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin-top:14px;"><tr>
+      <td style="border-top:1px solid #c9bfaa;"></td>
+      <td style="padding:0 12px;white-space:nowrap;">
+        <span style="font-family:'Helvetica Neue',Arial,sans-serif;font-size:8px;letter-spacing:0.3em;text-transform:uppercase;color:#9ca3af;">
+          Prepared exclusively for Hubbell Incorporated
+        </span>
+      </td>
+      <td style="border-top:1px solid #c9bfaa;"></td>
+    </tr></table>
   </td></tr>
 
   <!-- BODY -->
-  <tr><td style="padding:28px 44px 36px;background:#faf6ee;">
+  <tr><td style="padding:30px 44px 36px;background:#f5f0e8;">
     ${body}
   </td></tr>
 
   <!-- FOOTER -->
-  <tr><td style="padding:16px 44px;border-top:3px double #0f0f0f;text-align:center;background:#faf6ee;">
-    <p style="margin:0;font-family:'Helvetica Neue',Arial,sans-serif;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:#9ca3af;">
-      Hubbell Data Center Intelligence Briefing &nbsp;·&nbsp; Automated via Claude AI &nbsp;·&nbsp; Live Web Sources<br/>
-      For internal use only &nbsp;·&nbsp; ${dateLabel}
+  <tr><td style="padding:16px 44px 20px;border-top:3px double #0f0f0f;text-align:center;background:#f5f0e8;">
+    <p style="margin:0 0 4px;font-family:'Helvetica Neue',Arial,sans-serif;font-size:8px;letter-spacing:0.25em;text-transform:uppercase;color:#9ca3af;">
+      DataCenterIQ &nbsp;·&nbsp; Automated via Claude AI + Live Web Search
     </p>
+    <p style="margin:0;font-family:'Helvetica Neue',Arial,sans-serif;font-size:8px;letter-spacing:0.2em;text-transform:uppercase;color:#c9bfaa;">
+      For internal use only &nbsp;·&nbsp; ${dateStr}
+    </p>
+  </td></tr>
+
+  <!-- BOTTOM RULE -->
+  <tr><td style="padding:0 44px;">
+    <table width="100%" cellpadding="0" cellspacing="0"><tr>
+      <td style="height:4px;background:#c8401a;"></td>
+    </tr></table>
   </td></tr>
 
 </table>
 </td></tr></table>
+
 </body>
 </html>`;
 }
@@ -299,10 +291,10 @@ async function sendEmail(markdown, html) {
   console.log("SMTP connection verified.");
 
   const recipients = TO_EMAILS.split(",").map(e => e.trim()).filter(Boolean);
-  const subject = `Data Center Intelligence Briefing — ${today.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`;
+  const subject = `DataCenterIQ — ${today.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`;
 
   await transport.sendMail({
-    from: `"Data Center Intelligence Briefing" <${FROM_EMAIL}>`,
+    from: `"DataCenterIQ — Hubbell Intelligence" <${FROM_EMAIL}>`,
     to: recipients.join(", "),
     subject,
     text: markdown,
@@ -322,4 +314,3 @@ try {
   console.error("ERROR:", err.message);
   process.exit(1);
 }
-
