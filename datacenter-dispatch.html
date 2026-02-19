@@ -364,8 +364,30 @@
   function buildPrompt() {
     return `Today is ${new Date().toDateString()}.
 
-You are a professional technology journalist producing the daily US Data Center Dispatch newsletter. Search the web for news articles published in the past 24-48 hours about new data center developments in the United States.
+Please generate today's Daily Data Center Intelligence Briefing using the prompt below.
 
+PROMPT:
+Create a professionally written daily data center intelligence briefing summarizing the most important U.S. and global data center news, analysis, and market signals published within the past 24-48 hours.
+
+The briefing must be tailored for Business Development at Hubbell Incorporated and should emphasize developments affecting electrical infrastructure, power distribution, grid capacity, switchgear, connectors, cable management, utility‑scale power systems, cooling‑electrical integration, and construction activity.
+
+Structure the output exactly with these sections:
+1. Top Headlines (3–7 items)
+2. U.S. Market Update
+3. International Market Update
+4. Hyperscaler‑Specific Activity (AWS, Azure, Google, Meta, OpenAI/xAI/Oracle/SB Energy, Alibaba/Tencent/Baidu if relevant)
+5. Technology & Infrastructure Trends
+6. Competitor Tracking (Eaton, Schneider Electric, ABB, Vertiv, nVent)
+7. Implications for Hubbell
+8. Quick‑Scan Summary (bulleted)
+
+Tone: Executive‑ready, concise, strategic.
+Audience: Hubbell sales, product management, executives, and strategy teams.
+Length: 800-1000 / words.
+Citations: Add sources for all factual items from today's search results.
+Deliver in clean, well‑formatted Markdown.
+Include a relevance factor to Hubbell Incorporated for each headline, and summarize all information with a relevance chart at the bottom of the breifing.
+Format your response using HTML tags for headings, bold, lists, etc.
 Search for: new campus announcements, construction starts, expansions, investment rounds, hyperscaler projects (AWS, Azure, Google Cloud, Meta, Oracle, Microsoft), colocation facility openings, power purchase agreements, and land acquisitions.
 
 After searching, return ONLY a raw JSON object — no markdown fences, no explanation, no preamble. Use exactly this structure:
